@@ -6,7 +6,7 @@ const secretText = "superSeccret";
 
 const posts = [
   {
-    username: "Kyle",
+    username: "chlwldms",
     title: "Post 1",
   },
   {
@@ -26,9 +26,22 @@ app.post("/login", (req, res) => {
   res.json({ acessToken: acessToken });
 });
 
-app.get("/posts", (req, res) => {
+app.get("/posts", authMiddleware, (req, res) => {
   res.json(posts);
 });
+
+function authMiddleware(req, res, next) {
+  // Get the token from the header
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (token == null) return res.sendStatus(401);
+
+  jwt.verify(token, secretText, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+}
 
 const port = 3000;
 app.listen(port, () => {
